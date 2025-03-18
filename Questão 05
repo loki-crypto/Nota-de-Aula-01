@@ -1,0 +1,177 @@
+-------------------------------------------------------------------------------Main-----------------------------------------------------------------------------
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Biblioteca biblioteca = new Biblioteca();
+
+        while (true) {
+            System.out.println("\nEscolha uma opção:");
+            System.out.println("1 - Registrar livro");
+            System.out.println("2 - Registrar usuário");
+            System.out.println("3 - Emprestar livro");
+            System.out.println("4 - Devolver livro");
+            System.out.println("5 - Exibir livros emprestados");
+            System.out.println("0 - Sair");
+            int opcao = scanner.nextInt();
+            scanner.nextLine(); // Consumir a nova linha
+
+            switch (opcao) {
+                case 1:
+                    System.out.print("Título do livro: ");
+                    String titulo = scanner.nextLine();
+                    System.out.print("Autor do livro: ");
+                    String autor = scanner.nextLine();
+                    biblioteca.registrarLivro(titulo, autor);
+                    break;
+                case 2:
+                    System.out.print("Nome do usuário: ");
+                    String nome = scanner.nextLine();
+                    System.out.print("ID do usuário: ");
+                    int id = scanner.nextInt();
+                    biblioteca.registrarUsuario(nome, id);
+                    break;
+                case 3:
+                    System.out.print("Título do livro a emprestar: ");
+                    String tituloEmprestimo = scanner.nextLine();
+                    System.out.print("ID do usuário: ");
+                    int usuarioId = scanner.nextInt();
+                    biblioteca.emprestarLivro(tituloEmprestimo, usuarioId);
+                    break;
+                case 4:
+                    System.out.print("Título do livro a devolver: ");
+                    String tituloDevolucao = scanner.nextLine();
+                    biblioteca.devolverLivro(tituloDevolucao);
+                    break;
+                case 5:
+                    biblioteca.exibirLivrosEmprestados();
+                    break;
+                case 0:
+                    System.out.println("Saindo...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Opção inválida!");
+            }
+        }
+    }
+}
+
+
+------------------------------------------------------------------arquivo biblioteca----------------------------------------------------------------------------------
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Biblioteca {
+    private List<Livro> livros;
+    private List<Usuario> usuarios;
+
+    public Biblioteca() {
+        livros = new ArrayList<>();
+        usuarios = new ArrayList<>();
+    }
+
+    public void registrarLivro(String titulo, String autor) {
+        livros.add(new Livro(titulo, autor));
+        System.out.println("Livro registrado: " + titulo);
+    }
+
+    public void registrarUsuario(String nome, int id) {
+        usuarios.add(new Usuario(nome, id));
+        System.out.println("Usuário registrado: " + nome);
+    }
+
+    public void emprestarLivro(String titulo, int usuarioId) {
+        Livro livro = livros.stream()
+                .filter(l -> l.getTitulo().equals(titulo) && !l.isEmprestado())
+                .findFirst()
+                .orElse(null);
+
+        if (livro != null) {
+            livro.emprestar();
+        } else {
+            System.out.println("Livro não disponível para empréstimo!");
+        }
+    }
+
+    public void devolverLivro(String titulo) {
+        Livro livro = livros.stream()
+                .filter(l -> l.getTitulo().equals(titulo) && l.isEmprestado())
+                .findFirst()
+                .orElse(null);
+
+        if (livro != null) {
+            livro.devolver();
+        } else {
+            System.out.println("Livro não encontrado ou já devolvido!");
+        }
+    }
+
+    public void exibirLivrosEmprestados() {
+        System.out.println("Livros emprestados:");
+        livros.stream()
+                .filter(Livro::isEmprestado)
+                .forEach(l -> System.out.println(l.getTitulo()));
+    }
+}
+
+--------------------------------------------------------------------------USER----------------------------------------------------------------------------------------------
+public class Usuario {
+    private String nome;
+    private int id;
+
+    public Usuario(String nome, int id) {
+        this.nome = nome;
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public int getId() {
+        return id;
+    }
+}
+----------------------------------------------------------------------livros------------------------------------------------------------------------------------------------
+
+public class Livro {
+    private String titulo;
+    private String autor;
+    private boolean emprestado;
+
+    public Livro(String titulo, String autor) {
+        this.titulo = titulo;
+        this.autor = autor;
+        this.emprestado = false;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public boolean isEmprestado() {
+        return emprestado;
+    }
+
+    public void emprestar() {
+        if (!emprestado) {
+            emprestado = true;
+            System.out.println("Livro emprestado: " + titulo);
+        } else {
+            System.out.println("Livro já está emprestado!");
+        }
+    }
+
+    public void devolver() {
+        if (emprestado) {
+            emprestado = false;
+            System.out.println("Livro devolvido: " + titulo);
+        } else {
+            System.out.println("Livro não estava emprestado!");
+        }
+    }
+}
